@@ -169,7 +169,9 @@ export default function Passport() {
       {
         score && (
           <div>
-            <h3>Your passport score is {score}, congratulations you are eligible!</h3>
+            {
+              Number(score) > thresholdNumber && <h3>Your passport score is {score}, congratulations you are eligible!</h3>
+            }
             <div style={styles.hiddenMessageContainer}>
               {
                 Number(score) < thresholdNumber && (
