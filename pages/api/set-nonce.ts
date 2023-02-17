@@ -20,7 +20,7 @@ export default async function handler(
     let address
     if (req.body) {
       let body = JSON.parse(req.body)
-      address = body.address
+      address = body.address.toLowerCase()
     }
     const nonce = uuid()
     const inputs = [{

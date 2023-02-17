@@ -28,7 +28,7 @@ export default async function handler(
       let address, signature, formData
       if (req.body) {
         let body = JSON.parse(req.body)
-        address = body.address
+        address = body.address.toLowerCase()
         signature = body.signature
         formData = body.formData
       }
@@ -42,8 +42,6 @@ export default async function handler(
         })
         const passportData = await response.json()
         if (parseInt(passportData.score) >= 32) {
-          console.log('passportData: ', passportData)
-
           const inputs = [{
             type: 'setFormData',
             address,

@@ -30,6 +30,8 @@ export default function Passport() {
   const [score, setScore] = useState<string>('')
   const [noScoreMessage, setNoScoreMessage] = useState<string>('')
   const [formData, setFormData] = useState({})
+  const [processing, setProcessing] = useState(false)
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false)
 
   useEffect(() => {
     checkConnection()
@@ -119,6 +121,8 @@ export default function Passport() {
   }
 
   async function submit() {
+    setShowSuccessMessage(false)
+    setProcessing(true)
     const response = await fetch('/api/set-nonce', {
       method: 'POST',
       body: JSON.stringify({
@@ -135,7 +139,7 @@ export default function Passport() {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
     const signature = await signer.signMessage(nonce)
-    await new Promise(r => setTimeout(r, 2000))
+    await new Promise(r => setTimeout(r, 3000))
     const response = await fetch(`/api/post`, {
       method: 'POST',
       body: JSON.stringify({
@@ -146,7 +150,11 @@ export default function Passport() {
     })
 
     const json = await response.json()
-    console.log('json: ', json)
+    setProcessing(false)
+    console.log('json:: ', json)
+    if (!json.error) {
+      setShowSuccessMessage(true)
+    }
   }
 
   return (
@@ -162,7 +170,7 @@ export default function Passport() {
       {
         score && (
           <div>
-            <h3>Your passport score is {score}</h3>
+            <h3>Your passport score is {score}, congratulations you are eligible!</h3>
             <div style={styles.hiddenMessageContainer}>
               {
                 Number(score) < thresholdNumber && (
@@ -207,7 +215,27 @@ export default function Passport() {
                 style={styles.input}
               />
             </div>
-            <button style={styles.largeButtonStyle} onClick={submit}>Submit Form</button>
+            {
+              showSuccessMessage && (
+                <p
+                style={{
+                  margin: '10px 0px 20px',
+                  fontSize: '36px',
+                  color: 'rgba(0, 0, 0, .5)'
+                }}
+                >Congratulations, you're now on the waitlist! ⚡️💅🔥</p>
+              )
+            }
+            {
+              processing && (
+                <p>Processing your submission....</p>
+              ) 
+            }
+            {
+              !processing && !showSuccessMessage && (
+                <button style={styles.largeButtonStyle} onClick={submit}>Submit Form</button>
+              )
+            }
           </>
         )
       }
