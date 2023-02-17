@@ -1,5 +1,4 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from 'next'
 import { Exm } from '@execution-machine/sdk'
 import { verifyMessage } from 'ethers'
 import { functionId } from '../../exm/functionId.js'
@@ -20,8 +19,8 @@ type Data = {
 }
 
 export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<Data>
+  req: any,
+  res: any
 ) {
   if (exmInstance) {
     try {
