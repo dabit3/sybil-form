@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { Exm } from '@execution-machine/sdk'
-import { ethers } from 'ethers'
+import { verifyMessage } from 'ethers'
 import { functionId } from '../../exm/functionId.js'
 
 const EXM_API_KEY = process.env.EXM_API_KEY 
@@ -35,7 +35,7 @@ export default async function handler(
       const GET_PASSPORT_SCORE_URI = `https://api.scorer.gitcoin.co/registry/score/${COMMUNITY_ID}/${address}`
       const exmdata = await exmInstance.functions.read(functionId)
       const nonce = exmdata['users'][address]['nonce']
-      const decodedAddress = ethers.utils.verifyMessage(nonce, signature)
+      const decodedAddress = verifyMessage(nonce, signature)
       if(address.toLowerCase() === decodedAddress.toLowerCase()) {
         const response = await fetch(GET_PASSPORT_SCORE_URI, {
           headers

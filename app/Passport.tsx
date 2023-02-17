@@ -37,8 +37,8 @@ export default function Passport() {
     checkConnection()
     async function checkConnection() {
       try {
-        const provider = new ethers.providers.Web3Provider(window.ethereum)
-        const accounts = await provider.listAccounts()
+        const provider = new ethers.BrowserProvider(window.ethereum)
+        const accounts = await provider.send("eth_requestAccounts", [])
         if (accounts && accounts[0]) {
           setConnected(true)
           setAddress(accounts[0])
@@ -99,8 +99,8 @@ export default function Passport() {
     setNoScoreMessage('')
     try {
       const { message, nonce } = await getSigningMessage()
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
-      const signer = provider.getSigner()
+      const provider = new ethers.BrowserProvider(window.ethereum)
+      const signer = await provider.getSigner()
       const signature = await signer.signMessage(message)
       
       const response = await fetch(SUBMIT_PASSPORT_URI, {
@@ -130,14 +130,13 @@ export default function Passport() {
       })
     })
     const json = await response.json()
-    console.log('json:', json)
     await post(json.nonce)
   }
 
   async function post(nonce) {
     // the /post endpoint will verify the user's identity, and only post if they were indeed the wallet owner
-    const provider = new ethers.providers.Web3Provider(window.ethereum)
-    const signer = provider.getSigner()
+    const provider = new ethers.BrowserProvider(window.ethereum)
+    const signer = await provider.getSigner()
     const signature = await signer.signMessage(nonce)
     await new Promise(r => setTimeout(r, 3000))
     const response = await fetch(`/api/post`, {
@@ -228,7 +227,10 @@ export default function Passport() {
             }
             {
               processing && (
-                <p>Processing your submission....</p>
+                <div style={{display: 'flex'}}>
+                  <img src="/spinner.svg" className="spinner" />
+                  <p>Processing your submission....</p>
+                </div>
               ) 
             }
             {
