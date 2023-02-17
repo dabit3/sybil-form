@@ -51,12 +51,12 @@ export default async function handler(
       //   } else {
       //     res.status(200).json({ status: 'failure', error: 'score did not meet threshold' })
       //   }
-      } else {
-        res.status(200).json({
-          status: 'error',
-          error: 'nonce mismatch'
-        })
-      }     
+      // } else {
+      //   res.status(200).json({
+      //     status: 'error',
+      //     error: 'nonce mismatch'
+      //   })
+      // }     
     } catch (err) {
       console.log('error from verify: ', err)
       res.status(500)
