@@ -29,6 +29,7 @@ export default function Passport() {
   const [connected, setConnected] = useState<boolean>(false)
   const [score, setScore] = useState<string>('')
   const [noScoreMessage, setNoScoreMessage] = useState<string>('')
+  const [formData, setFormData] = useState({})
 
   useEffect(() => {
     checkConnection()
@@ -111,13 +112,13 @@ export default function Passport() {
         })
       })
 
-      const data = await response.json()
+      await response.json()
     } catch (err) {
       console.log('error: ', err)
     }
   }
 
-  async function sign() {
+  async function submit() {
     const response = await fetch('/api/set-nonce', {
       method: 'POST',
       body: JSON.stringify({
@@ -125,22 +126,22 @@ export default function Passport() {
       })
     })
     const json = await response.json()
-    await verify(json.nonce)
+    console.log('json:', json)
+    await post(json.nonce)
   }
 
-  async function verify(nonce) {
-    // this would be where we post to a verified form
-    // the /verify endpoint will verify the user's identity, and only post if they were indeed the wallet owner
-    // other logic there could check for the user's Gitcoin Passport score
+  async function post(nonce) {
+    // the /post endpoint will verify the user's identity, and only post if they were indeed the wallet owner
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
     const signature = await signer.signMessage(nonce)
     await new Promise(r => setTimeout(r, 2000))
-    const response = await fetch(`/api/verify`, {
+    const response = await fetch(`/api/post`, {
       method: 'POST',
       body: JSON.stringify({
         signature,
-        address
+        address,
+        formData
       })
     })
 
@@ -150,29 +151,36 @@ export default function Passport() {
 
   return (
     <div style={styles.main}>
-      <h1 style={styles.heading}>Passport Scorer 🫶</h1>
-      <p style={styles.intro}>Gitcoin Passport is an identity protocol that proves your trustworthiness without needing to collect personally identifiable information.</p>
-      <p style={styles.configurePassport}>Configure your passport <a style={styles.linkStyle} target="_blank" href="https://passport.gitcoin.co/#/dashboard">here</a></p>
-      <p style={styles.configurePassport}>Once you've added more stamps to your passport, submit your passport again to recalculate your score.</p>
+      <h1 style={styles.heading}>SYBIL FORMS</h1>
+      <p style={styles.intro}>Gitcoin Passport is an identity protocol that proves your trustworthiness without needing to collect personally identifiable information. Configure your passport <a style={styles.linkStyle} target="_blank" href="https://passport.gitcoin.co/#/dashboard">here</a></p>
       <div style={styles.buttonContainer}>
       {
         !connected && (
-          <button style={styles.buttonStyle} onClick={connect}>Connect Wallet</button>
+          <button style={styles.largeButtonStyle} onClick={connect}>Connect Wallet</button>
         )
       }
       {
         score && (
           <div>
-            <h1>Your passport score is {score} 🎉</h1>
+            <h3>Your passport score is {score}</h3>
             <div style={styles.hiddenMessageContainer}>
               {
-                Number(score) >= thresholdNumber && (
-                  <h2>Congratulations, you can view this secret message!</h2>
-                )
-              }
-              {
                 Number(score) < thresholdNumber && (
-                  <h2>Sorry, your score is not high enough to view the secret message.</h2>
+                  <>
+                  <h3>Sorry, your score is not high enough to join the allow-list.</h3>
+                  <div style={styles.stepsContainer}>
+                    <p style={styles.stepsHeader}>INCREASE YOUR SCORE:</p>
+                    <p>Contribute to Gitcoin Grants</p>
+                    <p>Link a Twitter Profile</p>
+                    <p>Link a Github Account</p>
+                    <p>Verify ENS Ownership</p>
+                    <p>Verify Proof of Humanity</p>
+                  </div>
+                  <div style={styles.buttonContainer}>
+                    <button style={styles.buttonStyle} onClick={submitPassport}>Submit Passport</button>
+                    <button style={styles.buttonStyle} onClick={() => checkPassport()}>Re-check passport score</button>
+                  </div>
+                </>
                 )
               }
             </div>
@@ -180,12 +188,27 @@ export default function Passport() {
         )
       }
       {
-        connected && (
-          <div style={styles.buttonContainer}>
-            <button style={styles.buttonStyle} onClick={submitPassport}>Submit Passport</button>
-            <button style={styles.buttonStyle} onClick={() => checkPassport()}>Check passport score</button>
-            <button style={styles.buttonStyle} onClick={sign}>Verify Identity</button>
-          </div>
+        Number(score) >= thresholdNumber && (
+          <>
+            <div style={styles.formContainer}>
+              <input
+                onChange={e => setFormData({ ...formData, twitter: e.target.value })}
+                placeholder='Twitter handle'
+                style={styles.input}
+              />
+              <input
+                onChange={e => setFormData({ ...formData, github: e.target.value })}
+                placeholder='Github handle'
+                style={styles.input}
+              />
+              <input
+                onChange={e => setFormData({ ...formData, github: e.target.value })}
+                placeholder='Interests'
+                style={styles.input}
+              />
+            </div>
+            <button style={styles.largeButtonStyle} onClick={submit}>Submit Form</button>
+          </>
         )
       }
       {
