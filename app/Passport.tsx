@@ -37,10 +37,8 @@ export default function Passport() {
     checkConnection()
     async function checkConnection() {
       try {
-        const eth = await window.ethereum.accounts()
-        console.log('eth: ', eth)
         const provider = new ethers.providers.Web3Provider(window.ethereum)
-        const accounts = await provider.send("eth_requestAccounts", [])
+        const accounts = await provider.listAccounts()
         if (accounts && accounts[0]) {
           setConnected(true)
           setAddress(accounts[0])
