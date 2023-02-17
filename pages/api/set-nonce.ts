@@ -30,15 +30,14 @@ export default async function handler(
     address
   }
   try {
-    const response = await fetch(FUNCTION_URI, {
+    await fetch(FUNCTION_URI, {
       method: 'POST',
       headers,
       body: JSON.stringify({
         ...input
       })
     })
-    const json = await response.json()
-    console.log('json from exm api: ', JSON.stringify(json))
+
     res.status(200).json({
       status: 'success',
       nonce

@@ -16,22 +16,49 @@ type Data = {
   error?: string
 }
 
+function wait() {
+  return new Promise(resolve => setTimeout(resolve, 1000));
+}
+
 export default async function handler(
   req: any,
   res: any
 ) {
+
+  async function verify(address, retries) {
+    if (retries < 1) {
+      res.status(200).json({
+        status: 'error',
+        error: 'nonce mismatch'
+      })
+    }
+    try {
+      let exmdata = await fetch(FUNCTION_URI)
+      exmdata = await exmdata.json()
+      let user = exmdata['users'][address]
+      if (user) {
+        const nonce = exmdata['users'][address]['nonce']
+        return nonce
+      } else {
+        await wait()
+        return await verify(address, retries - 1)
+      }
+    } catch (err) {
+      console.log("error: ", err)
+      await wait()
+      return await verify(address, retries - 1)
+    }
+  }
+
   try {
     let address, signature, formData
-    if (req.body) {
-      let body = JSON.parse(req.body)
+    let body = JSON.parse(req.body)
       address = body.address.toLowerCase()
       signature = body.signature
       formData = body.formData
-    }
     const GET_PASSPORT_SCORE_URI = `https://api.scorer.gitcoin.co/registry/score/${COMMUNITY_ID}/${address}`
-    let exmdata = await fetch(FUNCTION_URI)
-    exmdata = await exmdata.json()
-    const nonce = exmdata['users'][address]['nonce']
+    const nonce = await verify(address, 10)
+
     const decodedAddress = ethers.utils.verifyMessage(nonce, signature)
     if(address.toLowerCase() === decodedAddress.toLowerCase()) {
       const response = await fetch(GET_PASSPORT_SCORE_URI, {

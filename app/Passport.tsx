@@ -70,7 +70,6 @@ export default function Passport() {
         headers
       })
       const passportData = await response.json()
-      console.log('passportData: ', passportData)
       if (passportData.score) {
         const roundedScore = Math.round(passportData.score * 100) / 100
         setScore(roundedScore.toString())
@@ -138,7 +137,6 @@ export default function Passport() {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = await provider.getSigner()
     const signature = await signer.signMessage(nonce)
-    await new Promise(r => setTimeout(r, 3000))
     const response = await fetch(`/api/post`, {
       method: 'POST',
       body: JSON.stringify({
@@ -150,7 +148,6 @@ export default function Passport() {
 
     const json = await response.json()
     setProcessing(false)
-    console.log('json:: ', json)
     if (!json.error) {
       setShowSuccessMessage(true)
     }
