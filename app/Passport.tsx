@@ -37,7 +37,9 @@ export default function Passport() {
     checkConnection()
     async function checkConnection() {
       try {
-        const provider = new ethers.BrowserProvider(window.ethereum)
+        const eth = await window.ethereum.accounts()
+        console.log('eth: ', eth)
+        const provider = new ethers.providers.Web3Provider(window.ethereum)
         const accounts = await provider.send("eth_requestAccounts", [])
         if (accounts && accounts[0]) {
           setConnected(true)
@@ -99,7 +101,7 @@ export default function Passport() {
     setNoScoreMessage('')
     try {
       const { message, nonce } = await getSigningMessage()
-      const provider = new ethers.BrowserProvider(window.ethereum)
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
       const signer = await provider.getSigner()
       const signature = await signer.signMessage(message)
       
@@ -135,7 +137,7 @@ export default function Passport() {
 
   async function post(nonce) {
     // the /post endpoint will verify the user's identity, and only post if they were indeed the wallet owner
-    const provider = new ethers.BrowserProvider(window.ethereum)
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = await provider.getSigner()
     const signature = await signer.signMessage(nonce)
     await new Promise(r => setTimeout(r, 3000))

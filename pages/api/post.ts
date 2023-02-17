@@ -1,5 +1,5 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { verifyMessage } from 'ethers'
+import { ethers } from 'ethers'
 import { functionId } from '../../exm/functionId.js'
 
 const API_KEY = process.env.NEXT_PUBLIC_GC_API_KEY
@@ -32,7 +32,7 @@ export default async function handler(
     let exmdata = await fetch(FUNCTION_URI)
     exmdata = await exmdata.json()
     const nonce = exmdata['users'][address]['nonce']
-    const decodedAddress = verifyMessage(nonce, signature)
+    const decodedAddress = ethers.utils.verifyMessage(nonce, signature)
     if(address.toLowerCase() === decodedAddress.toLowerCase()) {
       const response = await fetch(GET_PASSPORT_SCORE_URI, {
         headers
