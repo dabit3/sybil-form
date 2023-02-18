@@ -1,7 +1,9 @@
 export async function handle(state, action) {
   const { input } = action
   if (input.type === 'setNonce') {
-    state.users[input.address] = {}
+    if (!state.users[input.address]) {
+      state.users[input.address] = {}
+    }
     state.users[input.address]['nonce'] = input.nonce
   }
   if (input.type === 'setFormData') {

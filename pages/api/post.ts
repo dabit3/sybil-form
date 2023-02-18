@@ -58,8 +58,8 @@ export default async function handler(
       formData = body.formData
     const GET_PASSPORT_SCORE_URI = `https://api.scorer.gitcoin.co/registry/score/${COMMUNITY_ID}/${address}`
     const nonce = await verify(address, 10)
-
     const decodedAddress = ethers.utils.verifyMessage(nonce, signature)
+
     if(address.toLowerCase() === decodedAddress.toLowerCase()) {
       const response = await fetch(GET_PASSPORT_SCORE_URI, {
         headers
@@ -81,7 +81,6 @@ export default async function handler(
           })
         })
         response = await response.json()
-        console.log('response: ', response)
         res.status(200).json({ status: 'success' })
       } else {
         res.status(200).json({ status: 'failure', error: 'score did not meet threshold' })
