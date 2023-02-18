@@ -1,6 +1,8 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+import type { NextApiRequest, NextApiResponse } from 'next'
 import { ethers } from 'ethers'
 import { functionId } from '../../exm/functionId.js'
+import { formatDistance, parseISO } from 'date-fns'
 
 const API_KEY = process.env.NEXT_PUBLIC_GC_API_KEY
 const COMMUNITY_ID = process.env.NEXT_PUBLIC_GC_COMMUNITY_ID
@@ -21,8 +23,8 @@ function wait() {
 }
 
 export default async function handler(
-  req: any,
-  res: any
+  req: NextApiRequest,
+  res: NextApiResponse<Data>
 ) {
 
   async function verify(address, retries) {
@@ -37,8 +39,7 @@ export default async function handler(
       exmdata = await exmdata.json()
       let user = exmdata['users'][address]
       if (user) {
-        const nonce = exmdata['users'][address]['nonce']
-        return nonce
+        return user
       } else {
         await wait()
         return await verify(address, retries - 1)
@@ -53,11 +54,17 @@ export default async function handler(
   try {
     let address, signature, formData
     let body = JSON.parse(req.body)
-      address = body.address.toLowerCase()
-      signature = body.signature
-      formData = body.formData
+    address = body.address.toLowerCase()
+    signature = body.signature
+    formData = body.formData
     const GET_PASSPORT_SCORE_URI = `https://api.scorer.gitcoin.co/registry/score/${COMMUNITY_ID}/${address}`
-    const nonce = await verify(address, 10)
+    const { nonce, time } = await verify(address, 10)
+
+    const distance = formatDistance(new Date(), parseISO(time))
+    if (distance !== 'less than a minute') {
+      throw new Error('nonce error...')
+    }
+  
     const decodedAddress = ethers.utils.verifyMessage(nonce, signature)
 
     if(address.toLowerCase() === decodedAddress.toLowerCase()) {

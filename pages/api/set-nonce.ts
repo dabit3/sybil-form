@@ -27,7 +27,8 @@ export default async function handler(
   const input = {
     type: 'setNonce',
     nonce,
-    address
+    address,
+    time: new Date()
   }
   try {
     await fetch(FUNCTION_URI, {
