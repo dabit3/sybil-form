@@ -6,10 +6,20 @@ import { formatDistance, parseISO } from 'date-fns'
 
 const FUNCTION_URI = `https://${functionId}.exm.run`
 
+let admins = [
+  "0xB2Ebc9b3a788aFB1E942eD65B59E9E49A1eE500D"
+]
+
+admins = admins.map(admin => admin.toLocaleLowerCase())
+
 type Data = {
   status: string,
   error?: string,
   users?: any[]
+}
+
+function wait() {
+  return new Promise(resolve => setTimeout(resolve, 1000));
 }
 
 export default async function handler(
@@ -19,25 +29,54 @@ export default async function handler(
   let body = JSON.parse(req.body)
   const address = body.address.toLowerCase()
   const signature = body.signature
-  const response = await fetch(FUNCTION_URI)
-  const json = await response.json()
-  console.log('json: ', json)
-  const { nonce, time } = json['users'][address]
-  const distance = formatDistance(new Date(), parseISO(time))
-  if (distance !== 'less than a minute') {
-    throw new Error('nonce error...')
-  }
-  
-  const decodedAddress = ethers.utils.verifyMessage(nonce, signature)
-  if(address.toLowerCase() === decodedAddress.toLowerCase()) {
+
+  async function verify(signature, retries) {
+    if (retries < 1) {
+      res.status(200).json({
+        status: 'error',
+        error: 'Nonce mismatch.'
+      })
+    }
     const response = await fetch(FUNCTION_URI)
     const json = await response.json()
-    const users = Object.values(json.users)
+    const { nonce, time } = json['users'][address]
+    const decodedAddress = ethers.utils.verifyMessage(nonce, signature)
 
-    res.status(200).json({
-      status: 'success',
-      users
-    })
+    if (decodedAddress.toLowerCase() === address) {
+      console.log('success...')
+      const distance = formatDistance(new Date(), parseISO(time))
+      if (distance == 'less than a minute') {
+        return true
+      } else {
+        console.log('distance retry...')
+        await wait()
+        return await verify(signature, retries - 1)
+      }
+    } else {
+      console.log('signature retry...')
+      await wait()
+      return await verify(signature, retries - 1)
+    }
+  }
+
+  const verified = await verify(signature, 5)
+  if(verified) {
+    if (!admins.includes(address.toLowerCase())) {
+      console.log('not an admin...')
+      res.status(200).json({
+        status: 'error',
+        error: 'Not an admin.'
+      })
+    } else {
+      const response = await fetch(FUNCTION_URI)
+      const json = await response.json()
+      const users = Object.values(json.users)
+
+      res.status(200).json({
+        status: 'success',
+        users
+      })
+    }
   } else {
     res.status(200).json({
       status: 'error',

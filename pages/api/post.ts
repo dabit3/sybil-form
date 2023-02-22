@@ -51,6 +51,20 @@ export default async function handler(
     }
   }
 
+  async function checkTime(time, retries) {
+    if (retries < 1) {
+      res.status(200).json({
+        status: 'error',
+        error: 'nonce mismatch'
+      })
+    }
+    const distance = formatDistance(new Date(), parseISO(time))
+    if (distance !== 'less than a minute') {
+      await wait()
+      return await checkTime(time, retries - 1)
+    }
+  }
+
   try {
     let address, signature, formData
     let body = JSON.parse(req.body)
@@ -59,24 +73,21 @@ export default async function handler(
     formData = body.formData
     const GET_PASSPORT_SCORE_URI = `https://api.scorer.gitcoin.co/registry/score/${COMMUNITY_ID}/${address}`
     const { nonce, time } = await verify(address, 10)
+    await checkTime(time, 5)
 
-    const distance = formatDistance(new Date(), parseISO(time))
-    if (distance !== 'less than a minute') {
-      throw new Error('nonce error...')
-    }
-  
     const decodedAddress = ethers.utils.verifyMessage(nonce, signature)
-
     if(address.toLowerCase() === decodedAddress.toLowerCase()) {
       const response = await fetch(GET_PASSPORT_SCORE_URI, {
         headers
       })
       const passportData = await response.json()
       if (parseInt(passportData.score) >= 32) {
+        console.log('score: ', passportData.score)
         const input = {
           type: 'setFormData',
           address,
-          formData
+          formData,
+          score: passportData.score
         }
         let response = await fetch(FUNCTION_URI, {
           method: 'POST',
