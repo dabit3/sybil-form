@@ -130,7 +130,7 @@ export default function Passport() {
 
   return (
     <div style={styles.main}>
-      <h1 style={styles.heading}>SYBIL FORMS</h1>
+      <h1 style={styles.heading}>SYBIL FORM</h1>
       <p style={styles.intro}>Gitcoin Passport is an identity protocol that proves your trustworthiness without needing to collect personally identifiable information. Configure your passport <a style={styles.linkStyle} target="_blank" href="https://passport.gitcoin.co/#/dashboard">here</a></p>
       <div style={styles.buttonContainer}>
       {
