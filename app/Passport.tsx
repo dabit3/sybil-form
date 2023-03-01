@@ -2,15 +2,12 @@
 import { useState, useEffect } from 'react'
 import { ethers } from 'ethers'
 import { styles } from './styles'
+import { ConnectButton } from '@rainbow-me/rainbowkit'
+import { useAccount, useSigner } from 'wagmi'
 
 const API_KEY = process.env.NEXT_PUBLIC_GC_API_KEY
 const COMMUNITY_ID = process.env.NEXT_PUBLIC_GC_COMMUNITY_ID
 
-declare global {
-  interface Window {
-    ethereum?: any
-  }
-}
 
 const headers = API_KEY ? ({
   'Content-Type': 'application/json',
@@ -25,41 +22,21 @@ const SIGNING_MESSAGE_URI = 'https://api.scorer.gitcoin.co/registry/signing-mess
 const thresholdNumber = 32
 
 export default function Passport() {
-  const [address, setAddress] = useState<string>('')
-  const [connected, setConnected] = useState<boolean>(false)
   const [score, setScore] = useState<string>('')
   const [noScoreMessage, setNoScoreMessage] = useState<string>('')
   const [formData, setFormData] = useState({})
   const [processing, setProcessing] = useState(false)
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
 
-  useEffect(() => {
-    checkConnection()
-    async function checkConnection() {
-      try {
-        const provider = new ethers.providers.Web3Provider(window.ethereum)
-        const accounts = await provider.listAccounts()
-        if (accounts && accounts[0]) {
-          setConnected(true)
-          setAddress(accounts[0])
-          checkPassport(accounts[0])
-        }
-      } catch (err) {
-        console.log('not connected...')
-      }
-    }
-  }, [])
+  const { address, isConnected } = useAccount()
+  const { data: signer } = useSigner()
 
-  async function connect() {
-    try {
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      setAddress(accounts[0])
-      setConnected(true)
-      checkPassport(accounts[0])
-    } catch (err) {
-      console.log('error connecting...')
+  useEffect(() => {
+    if (isConnected) {
+      checkPassport()
     }
-  }
+  }, [isConnected])
+
 
   async function checkPassport(currentAddress = address) {
     setScore('')
@@ -95,11 +72,10 @@ export default function Passport() {
   }
 
   async function submitPassport() {
+    if (!signer) return
     setNoScoreMessage('')
     try {
       const { message, nonce } = await getSigningMessage()
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
-      const signer = await provider.getSigner()
       const signature = await signer.signMessage(message)
       
       const response = await fetch(SUBMIT_PASSPORT_URI, {
@@ -133,9 +109,8 @@ export default function Passport() {
   }
 
   async function post(nonce) {
+    if (!signer) return
     // the /post endpoint will verify the user's identity, and only post if they were indeed the wallet owner
-    const provider = new ethers.providers.Web3Provider(window.ethereum)
-    const signer = await provider.getSigner()
     const signature = await signer.signMessage(nonce)
     const response = await fetch(`/api/post`, {
       method: 'POST',
@@ -159,8 +134,8 @@ export default function Passport() {
       <p style={styles.intro}>Gitcoin Passport is an identity protocol that proves your trustworthiness without needing to collect personally identifiable information. Configure your passport <a style={styles.linkStyle} target="_blank" href="https://passport.gitcoin.co/#/dashboard">here</a></p>
       <div style={styles.buttonContainer}>
       {
-        !connected && (
-          <button style={styles.largeButtonStyle} onClick={connect}>Connect Wallet</button>
+        !isConnected && (
+          <ConnectButton />
         )
       }
       {
