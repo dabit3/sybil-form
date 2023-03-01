@@ -148,7 +148,7 @@ export default function Passport() {
               {
                 Number(score) < thresholdNumber && (
                   <>
-                  <h3>Sorry, your score is not high enough to join the allow-list.</h3>
+                  <h3>Sorry, your score is {Number(score)}, it is not high enough to join the allow-list.</h3>
                   <div style={styles.stepsContainer}>
                     <p style={styles.stepsHeader}>INCREASE YOUR SCORE:</p>
                     <p>Contribute to Gitcoin Grants</p>
