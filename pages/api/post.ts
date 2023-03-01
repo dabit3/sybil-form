@@ -28,7 +28,7 @@ export default async function handler(
   res: NextApiResponse<Data>
 ) {
 
-  async function verify(address, retries) {
+  async function verify(address, retries, signature) {
     if (retries < 1) {
       res.status(200).json({
         status: 'error',
@@ -40,15 +40,21 @@ export default async function handler(
       exmdata = await exmdata.json()
       let user = exmdata['users'][address]
       if (user) {
-        return user
+        const decodedAddress = ethers.utils.verifyMessage(user.nonce, signature)
+        if (address.toLowerCase() === decodedAddress.toLowerCase()) {
+          return user
+        } else {
+          await wait()
+          return await verify(address, retries - 1, signature)
+        }
       } else {
         await wait()
-        return await verify(address, retries - 1)
+        return await verify(address, retries - 1, signature)
       }
     } catch (err) {
       console.log("error: ", err)
       await wait()
-      return await verify(address, retries - 1)
+      return await verify(address, retries - 1, signature)
     }
   }
 
@@ -69,12 +75,11 @@ export default async function handler(
   try {
     let address, signature, formData
     let body = JSON.parse(req.body)
-    console.log('body: ', body)
     address = body.address.toLowerCase()
     signature = body.signature
     formData = body.formData
     const GET_PASSPORT_SCORE_URI = `https://api.scorer.gitcoin.co/registry/score/${COMMUNITY_ID}/${address}`
-    const { nonce, time } = await verify(address, 10)
+    const { nonce, time } = await verify(address, 10, signature)
     await checkTime(time, 5)
 
     const decodedAddress = ethers.utils.verifyMessage(nonce, signature)
@@ -84,7 +89,6 @@ export default async function handler(
       })
       const passportData = await response.json()
       if (parseInt(passportData.score) >= THRESHOLD) {
-        console.log('score: ', passportData.score)
         const input = {
           type: 'setFormData',
           address,
@@ -103,9 +107,11 @@ export default async function handler(
         response = await response.json()
         res.status(200).json({ status: 'success' })
       } else {
+        console.log('score not met')
         res.status(200).json({ status: 'failure', error: 'score did not meet threshold' })
       }
     } else {
+      console.log('nonce mismatch')
       res.status(200).json({
         status: 'error',
         error: 'nonce mismatch'

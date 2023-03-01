@@ -58,24 +58,31 @@ export default function Admin(props) {
         !isConnected && (<ConnectButton />)
       }
       <div style={tableContainerStyle}>
-        <table style={{
-          tableLayout: 'fixed',
-          width: '940px',
-          borderSpacing: '0px'
-        }}>
-          <tr style={headingContainerStyle}>
-            <th style={thStyle}>Address</th>
-            <th style={thStyle}>Twitter</th>
-            <th style={thStyle}>GitHub</th>
-            <th style={thStyle}>Interests</th>
-            <th style={thStyle}>Score</th>
-          </tr>
-          </table>
+          {
+            Boolean(users.length) && (
+              <table style={{
+                tableLayout: 'fixed',
+                width: '940px',
+                borderSpacing: '0px'
+              }}>
+                <tbody>
+                <tr style={headingContainerStyle}>
+                  <th style={thStyle}>Address</th>
+                  <th style={thStyle}>Twitter</th>
+                  <th style={thStyle}>GitHub</th>
+                  <th style={thStyle}>Interests</th>
+                  <th style={thStyle}>Score</th>
+                </tr>
+                </tbody>
+              </table>
+            )
+          }
           <table style={{
           tableLayout: 'fixed',
           width: '940px',
           borderSpacing: '0px'
         }}>
+          <tbody>
           {
           users.map((user, index) => (
             <tr key={index} style={userContainerStyle}>
@@ -97,7 +104,8 @@ export default function Admin(props) {
             </tr>
           ))
         }
-        </table>
+        </tbody>
+        </table>  
       </div>
     </div>
   )

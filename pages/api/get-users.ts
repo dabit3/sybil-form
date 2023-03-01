@@ -59,7 +59,7 @@ export default async function handler(
     }
   }
 
-  const verified = await verify(signature, 5)
+  const verified = await verify(signature, 10)
   if(verified) {
     if (!admins.includes(address.toLowerCase())) {
       console.log('not an admin...')
