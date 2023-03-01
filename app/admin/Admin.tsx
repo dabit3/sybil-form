@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { ethers } from 'ethers'
 import { styles } from '../styles'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useAccount, useSigner } from 'wagmi'
@@ -59,13 +58,6 @@ export default function Admin(props) {
         !isConnected && (<ConnectButton />)
       }
       <div style={tableContainerStyle}>
-        {/* <div style={userContainerStyle}>
-            <p style={headerContentStyle}>Address</p>
-            <p style={headerContentStyle}>Twitter</p>
-            <p style={headerContentStyle}>Github</p>
-            <p style={headerContentStyle}>Interests</p>
-            <p style={headerContentStyle}>Gitcoin Passport</p>
-        </div> */}
         <table style={{
           tableLayout: 'fixed',
           width: '940px',
@@ -124,14 +116,14 @@ export default function Admin(props) {
 }
 
 const thStyle = {
-  textAlign: 'left',
+  textAlign: 'left' as 'left',
   width: '188px',
   padding: '10px',
   
 }
 
 const tdStyle = {
-  textAlign: 'left',
+  textAlign: 'left' as 'left',
   width: '188px',
   padding: '10px',
 }
