@@ -7,7 +7,8 @@ import { useAccount, useSigner } from 'wagmi'
 
 const API_KEY = process.env.NEXT_PUBLIC_GC_API_KEY
 const COMMUNITY_ID = process.env.NEXT_PUBLIC_GC_COMMUNITY_ID
-
+// score needed to see hidden message
+const THRESHOLD:number = Number(process.env.NEXT_PUBLIC_THRESHOLD)
 
 const headers = API_KEY ? ({
   'Content-Type': 'application/json',
@@ -18,8 +19,7 @@ const headers = API_KEY ? ({
 const SUBMIT_PASSPORT_URI = 'https://api.scorer.gitcoin.co/registry/submit-passport'
 // getting the signing message
 const SIGNING_MESSAGE_URI = 'https://api.scorer.gitcoin.co/registry/signing-message'
-// score needed to see hidden message
-const thresholdNumber = 32
+
 
 export default function Passport() {
   const [score, setScore] = useState<string>('')
@@ -142,11 +142,11 @@ export default function Passport() {
         score && (
           <div>
             {
-              Number(score) > thresholdNumber && <h3>Your passport score is {score}, congratulations you are eligible!</h3>
+              Number(score) > THRESHOLD && <h3>Your passport score is {score}, congratulations you are eligible!</h3>
             }
             <div style={styles.hiddenMessageContainer}>
               {
-                Number(score) < thresholdNumber && (
+                Number(score) < THRESHOLD && (
                   <>
                   <h3>Sorry, your score is {Number(score)}, it is not high enough to join the allow-list.</h3>
                   <div style={styles.stepsContainer}>
@@ -169,7 +169,7 @@ export default function Passport() {
         )
       }
       {
-        Number(score) >= thresholdNumber && (
+        Number(score) >= THRESHOLD && (
           <>
             <div style={styles.formContainer}>
               <input
@@ -183,7 +183,7 @@ export default function Passport() {
                 style={styles.input}
               />
               <input
-                onChange={e => setFormData({ ...formData, github: e.target.value })}
+                onChange={e => setFormData({ ...formData, interests: e.target.value })}
                 placeholder='Interests'
                 style={styles.input}
               />

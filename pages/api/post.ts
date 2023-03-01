@@ -7,6 +7,7 @@ import { formatDistance, parseISO } from 'date-fns'
 const API_KEY = process.env.NEXT_PUBLIC_GC_API_KEY
 const COMMUNITY_ID = process.env.NEXT_PUBLIC_GC_COMMUNITY_ID
 const FUNCTION_URI = `https://${functionId}.exm.run`
+const THRESHOLD:number = Number(process.env.NEXT_PUBLIC_THRESHOLD)
 
 const headers = API_KEY ? ({
   'Content-Type': 'application/json',
@@ -68,6 +69,7 @@ export default async function handler(
   try {
     let address, signature, formData
     let body = JSON.parse(req.body)
+    console.log('body: ', body)
     address = body.address.toLowerCase()
     signature = body.signature
     formData = body.formData
@@ -81,7 +83,7 @@ export default async function handler(
         headers
       })
       const passportData = await response.json()
-      if (parseInt(passportData.score) >= 32) {
+      if (parseInt(passportData.score) >= THRESHOLD) {
         console.log('score: ', passportData.score)
         const input = {
           type: 'setFormData',
