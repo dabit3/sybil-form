@@ -1,6 +1,8 @@
 'use client'
+
 import { useState, useEffect } from 'react'
 import { ethers } from 'ethers'
+import { styles } from '../styles'
 
 export default function Admin(props) {
   let [users, setUsers] = useState<any>([])
@@ -70,13 +72,16 @@ export default function Admin(props) {
   users = users.filter(u => u.formData)
 
   return (
-    <div>
+    <div style={styles.main}>
       <h1>Admin</h1>
       {
-        connected && !fetching && (<button onClick={fetchUsers}>Fetch Users</button>)
+        fetching && <p>Loading users...</p>
       }
       {
-        !connected && (<button onClick={connect}>Connect</button>)
+        connected && !fetching && (<button style={styles.buttonStyle} onClick={fetchUsers}>Fetch Users</button>)
+      }
+      {
+        !connected && (<button style={styles.buttonStyle} onClick={connect}>Connect</button>)
       }
       {
         users.map((user, index) => (
