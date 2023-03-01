@@ -29,14 +29,21 @@ documentation](https://docs.passport.gitcoin.co/)
     npm install
     ```
 
-2. Configure the environment variables for your Community ID and API key in
-   a file named `.env.local`. (see example configuration at
+2. Configure the environment variables for your:
+
+    a. Gitcoin Community ID
+    b. Gitcoin API Key
+    c. EXM API Key
+    d. Minimum score for your form
+
+   In a file named `.env.local`. (see example configuration at
    `.example.env.local`)
 
     ```
     NEXT_PUBLIC_GC_API_KEY=<your-api-key>
     NEXT_PUBLIC_GC_COMMUNITY_ID=<your-community-id>
     EXM_API_KEY=<your-exm-api-key>
+    NEXT_PUBLIC_THRESHOLD=<your-minimum-score>
     ```
 
 3. Deploy the EXM function

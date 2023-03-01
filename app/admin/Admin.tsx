@@ -98,18 +98,6 @@ export default function Admin(props) {
           ))
         }
         </table>
-
-        {/* {
-          users.map((user, index) => (
-            <div key={index} style={userContainerStyle}>
-              <a style={linkStyle} href={`https://etherscan.io/address/${user.addres}`}>{user.address.substring(0, 7)}....</a>
-              <p>{user.formData.twitter}</p>
-              <p>{user.formData.github}</p>
-              <p>{user.formData.interests}</p>
-              <p>{Math.round(user.score)}</p>
-            </div>
-          ))
-        } */}
       </div>
     </div>
   )
