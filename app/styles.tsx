@@ -63,7 +63,8 @@ export const styles = {
     marginTop: 15
   },
   noScoreMessage: {
-    marginTop: 20
+    marginTop: 20,
+    marginBottom: 20
   },
   stepsContainer: {
     marginTop: '20px'

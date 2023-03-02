@@ -91,6 +91,7 @@ export default function Passport() {
 
       await response.json()
     } catch (err) {
+      setNoScoreMessage('Please try resubmitting your passport and re-checking your score.')
       console.log('error: ', err)
     }
   }
@@ -216,7 +217,13 @@ export default function Passport() {
         )
       }
       {
-        noScoreMessage && (<p style={styles.noScoreMessage}>{noScoreMessage}</p>)
+        noScoreMessage && (
+          <div>
+            <p onClick={submitPassport} style={styles.noScoreMessage}>{noScoreMessage}</p>
+            <button style={styles.largeButtonStyle} onClick={submit}>Submit Passport</button>
+            <button style={styles.largeButtonStyle} onClick={() => checkPassport()}>Re-check Score</button>
+          </div>
+        )
       }
       </div>
     </div>
