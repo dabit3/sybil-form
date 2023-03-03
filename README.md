@@ -42,9 +42,9 @@ This app consists of two pages:
 
 2. Configure the environment variables for your:
 
-    a. Gitcoin Community ID
-    b. Gitcoin API Key
-    c. EXM API Key
+    a. Gitcoin Community ID    
+    b. Gitcoin API Key    
+    c. EXM API Key    
     d. Minimum score for your form
 
    In a file named `.env.local`. (see example configuration at
