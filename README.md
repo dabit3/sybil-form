@@ -20,16 +20,13 @@ This app consists of two pages:
 
 1. Gitcon Passport API variables
 
-To get started, you must first create an environment variable and community
-using the [Gitcoin Scorer API](https://scorer.gitcoin.co/).
+    To get started, you must first create an environment variable and community using the [Gitcoin Scorer API](https://scorer.gitcoin.co/).
 
-You can look through this codebase to see what a simple integration with Gitcoin
-Passport looks like. For more detailed information [check out the
-documentation](https://docs.passport.gitcoin.co/).
+    You can look through this codebase to see what a simple integration with Gitcoin Passport looks like. For more detailed information [check out the documentation](https://docs.passport.gitcoin.co/).
 
 2. EXM API Key
 
-You also need to create an [EXM API Key](https://exm.dev/app) and have it ready for the next steps.
+    You also need to create an [EXM API Key](https://exm.dev/app) and have it ready for the next steps.
 
 ### Running the app
 
