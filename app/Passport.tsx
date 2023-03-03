@@ -1,6 +1,5 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { ethers } from 'ethers'
 import { styles } from './styles'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useAccount, useSigner } from 'wagmi'
@@ -19,7 +18,6 @@ const headers = API_KEY ? ({
 const SUBMIT_PASSPORT_URI = 'https://api.scorer.gitcoin.co/registry/submit-passport'
 // getting the signing message
 const SIGNING_MESSAGE_URI = 'https://api.scorer.gitcoin.co/registry/signing-message'
-
 
 export default function Passport() {
   const [score, setScore] = useState<string>('')
