@@ -70,7 +70,7 @@ export const styles = {
     marginTop: '20px'
   },
   stepsHeader: {
-    color: 'rgba(0, 0, 0, .5)',
-    fontSize: '24px'
+    fontSize: '22px',
+    marginBottom: '9px'
   }
 }

@@ -23,8 +23,9 @@ export default function Passport() {
   const [score, setScore] = useState<string>('')
   const [noScoreMessage, setNoScoreMessage] = useState<string>('')
   const [formData, setFormData] = useState({})
-  const [processing, setProcessing] = useState(false)
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false)
+  const [processing, setProcessing] = useState<boolean>(false)
+  const [submittingPassport, setSubmittingPassport] = useState<boolean>(false)
+  const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false)
 
   const { address, isConnected } = useAccount()
   const { data: signer } = useSigner()
@@ -48,8 +49,10 @@ export default function Passport() {
       if (passportData.score) {
         const roundedScore = Math.round(passportData.score * 100) / 100
         setScore(roundedScore.toString())
+        setSubmittingPassport(false)
       } else {
         console.log('No score available, please add stamps to your passport and then resubmit.')
+        setSubmittingPassport(false)
         setNoScoreMessage('No score available, please submit your passport after you have added some stamps.')
       }
     } catch (err) {
@@ -71,12 +74,14 @@ export default function Passport() {
 
   async function submitPassport() {
     if (!signer) return
-    setNoScoreMessage('')
     try {
       const { message, nonce } = await getSigningMessage()
       const signature = await signer.signMessage(message)
-      
-      const response = await fetch(SUBMIT_PASSPORT_URI, {
+      setNoScoreMessage('')
+      setSubmittingPassport(true)
+      setScore('')
+      setNoScoreMessage('')
+      await fetch(SUBMIT_PASSPORT_URI, {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -86,10 +91,28 @@ export default function Passport() {
           nonce
         })
       })
-
-      await response.json()
+      checkPassportStatus()
     } catch (err) {
       setNoScoreMessage('Please try resubmitting your passport and re-checking your score.')
+      console.log('error: ', err)
+    }
+  }
+
+  async function checkPassportStatus() {
+    const GET_PASSPORT_SCORE_URI = `https://api.scorer.gitcoin.co/registry/score/${COMMUNITY_ID}/${address}`
+    try {
+      const response = await fetch(GET_PASSPORT_SCORE_URI, {
+        headers
+      })
+      const passportData = await response.json()
+      console.log('passportData: ', passportData)
+      if (passportData.status === 'PROCESSING') {
+        await wait()
+        return checkPassportStatus()
+      } else {
+        checkPassport()
+      }
+    } catch (err) {
       console.log('error: ', err)
     }
   }
@@ -138,6 +161,11 @@ export default function Passport() {
         )
       }
       {
+        submittingPassport && (
+          <h3>Please wait, submitting passport for new scoring ...</h3>
+        )
+      }
+      {
         score && (
           <div>
             {
@@ -150,11 +178,12 @@ export default function Passport() {
                   <h3>Sorry, your score is {Number(score)}, it is not high enough to join the allow-list.</h3>
                   <div style={styles.stepsContainer}>
                     <p style={styles.stepsHeader}>INCREASE YOUR SCORE:</p>
-                    <p>Contribute to Gitcoin Grants</p>
-                    <p>Link a Twitter Profile</p>
-                    <p>Link a Github Account</p>
-                    <p>Verify ENS Ownership</p>
-                    <p>Verify Proof of Humanity</p>
+                    <p>✅ Contribute to Gitcoin Grants</p>
+                    <p>🐦 Link a Twitter Profile</p>
+                    <p>🧑‍💻 Link a Github Account</p>
+                    <p>🔢 Verify ENS Ownership</p>
+                    <p>🫡 Verify Proof of Humanity</p>
+                    <p>🌿 Connect your Lens account</p>
                   </div>
                   <div style={styles.buttonContainer}>
                     <button style={styles.buttonStyle} onClick={submitPassport}>Submit Passport</button>
@@ -217,8 +246,8 @@ export default function Passport() {
       {
         noScoreMessage && (
           <div>
-            <p onClick={submitPassport} style={styles.noScoreMessage}>{noScoreMessage}</p>
-            <button style={styles.largeButtonStyle} onClick={submit}>Submit Passport</button>
+            <p style={styles.noScoreMessage}>{noScoreMessage}</p>
+            <button style={styles.largeButtonStyle} onClick={submitPassport}>Submit Passport</button>
             <button style={styles.largeButtonStyle} onClick={() => checkPassport()}>Re-check Score</button>
           </div>
         )
@@ -228,7 +257,9 @@ export default function Passport() {
   )
 }
 
-
+function wait() {
+  return new Promise((resolve) => setTimeout(resolve, 1000))
+}
 
 // async function getScorer() {
 //   //  api scorer
